@@ -6,7 +6,6 @@ import seaborn as sns
 from wordcloud import WordCloud
 from transformers import RobertaTokenizer, RobertaForSequenceClassification
 
-# Set page config and custom styles
 st.set_page_config(page_title="Comment Toxicity Checker", layout="wide")
 
 st.markdown("""
@@ -34,7 +33,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Load model/tokenizer
+#Loading Model
 @st.cache_resource
 def load_model():
     tokenizer = RobertaTokenizer.from_pretrained('s-nlp/roberta_toxicity_classifier')
@@ -52,12 +51,12 @@ def load_data():
 
 df = load_data()
 
-# ===== Title Section =====
+#Check comments for toxicity using model
 st.title("Comment Toxicity Checker")
 st.write("This tool uses a transformer model to classify YouTube-style comments as toxic or not.")
 st.warning("⚠️ Some examples may contain offensive or inappropriate language.")
 
-# ===== Comment Analysis Section =====
+
 comment = st.text_area("Paste your comment here:", placeholder="e.g. That was the worst take I've ever heard.")
 threshold = st.slider("Set toxicity threshold", 0.0, 1.0, 0.5)
 
@@ -77,10 +76,10 @@ if st.button("Analyze Comment"):
         st.caption(f"Confidence: {confidence:.2%}")
     else:
         st.warning("Please enter a comment first.")
-
-# ===== Data Overview Section =====
+        
+#Basic Visuals
 st.markdown("---")
-st.header("📊 Dataset Overview")
+st.header("Dataset Overview")
 st.write("""
 We combined three YouTube comment datasets to explore toxicity at scale:
 
@@ -89,7 +88,7 @@ We combined three YouTube comment datasets to explore toxicity at scale:
 - [Labeled Toxicity Comments](https://www.kaggle.com/datasets/reihanenamdari/youtube-toxicity-data)
 """)
 
-# ===== Visualization Section =====
+
 with st.expander("📈 Show Toxic vs Non-Toxic Predictions Chart"):
     fig, ax = plt.subplots(figsize=(2.5, 1.5), dpi=100)
     sns.countplot(data=df, x='prediction', palette='Reds', ax=ax)
@@ -99,8 +98,7 @@ with st.expander("📈 Show Toxic vs Non-Toxic Predictions Chart"):
     ax.tick_params(axis='x', labelsize=8)
     ax.tick_params(axis='y', labelsize=8)
     st.pyplot(fig, use_container_width=False)
-
-# ===== Top Toxic Comments =====
+#Wordclouds for the highest model confidence in Toxic and Non-Toxic
 with st.expander("🤬 Show Most Toxic Comments"):
     filtered = df[df['prediction'] == 'toxicity'].copy()
     filtered = filtered.sort_values(by='confidence', ascending=False).head(5)
@@ -110,7 +108,7 @@ with st.expander("🤬 Show Most Toxic Comments"):
 
     st.table(filtered)
 
-# ===== Least Toxic Comments =====
+
 with st.expander("😎 Show Least Toxic Comments"):
     filtered = df[df['prediction'] == 'non-toxic'].copy()
     filtered = filtered.sort_values(by='confidence', ascending=False).head(5)
@@ -122,7 +120,7 @@ with st.expander("😎 Show Least Toxic Comments"):
 
 
 
-# ===== Word Clouds =====
+
 with st.expander("☁️ Show Word Clouds by Prediction Category"):
     spacer_l, left_col, right_col, spacer_r = st.columns([2, 6, 6, 2])
 
